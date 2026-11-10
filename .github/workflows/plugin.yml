@@ -35,7 +35,7 @@ jobs:
           chmod 0644 "${RUNNER_TEMP}/ntfy/server.yml"
           docker run -d --name ntfy-account --read-only --cap-drop ALL --security-opt no-new-privileges \
             --user 1000:1000 -v "${RUNNER_TEMP}/ntfy:/config" \
-            -e NTFY_CONFIG_FILE=/config/server.yml -e NTFY_BASE_URL=http://192.0.2.1:2586 \
+            -e NTFY_CONFIG_FILE=/config/server.yml -e NTFY_BASE_URL=https://192.0.2.1 \
             -p 127.0.0.1:2586:2586 "${image}" serve >/dev/null
           for _ in $(seq 1 30); do
             if curl -fsS http://127.0.0.1:2586/v1/health >/dev/null 2>&1; then break; fi
@@ -46,9 +46,9 @@ jobs:
       - name: lemonfiber publishes to its topic and reads the message back from history
         run: |
           set -euo pipefail
-          id="$(curl -fsS -u "lemonfiber:${NTFY_PASSWORD}" -H 'Title: account' -d 'proof' http://127.0.0.1:2586/lemonfiber-ci | python3 -c 'import json, sys; print(json.load(sys.stdin)["id"])')"
+          published="$(curl -fsS -u "lemonfiber:${NTFY_PASSWORD}" -H 'Title: account' -d 'proof' http://127.0.0.1:2586/lemonfiber-ci)"
           history="$(curl -fsS -u "lemonfiber:${NTFY_PASSWORD}" 'http://127.0.0.1:2586/lemonfiber-ci/json?poll=1&since=all')"
-          ID="${id}" python3 -c 'import json, os, sys; ids = [json.loads(line)["id"] for line in sys.stdin if line.strip()]; sys.exit(0 if os.environ["ID"] in ids else "the message published as " + os.environ["ID"] + " is not in the topic history")' <<< "${history}"
+          PUBLISHED="${published}" HISTORY="${history}" python3 -c 'import json, os, sys; sent = json.loads(os.environ["PUBLISHED"])["id"]; kept = [json.loads(line)["id"] for line in os.environ["HISTORY"].splitlines() if line.strip()]; sys.exit(0 if sent in kept else "the message published as " + sent + " is not in the topic history")'
       - name: Every other topic, and every caller presenting nothing, is refused
         run: |
           set -euo pipefail
