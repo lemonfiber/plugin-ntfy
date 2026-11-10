@@ -30,7 +30,7 @@ user_mode   = "uid"
 
 [service.env]
 NTFY_CONFIG_FILE    = "/config/server.yml"
-NTFY_BASE_URL       = { setting = "ntfy:base-url", default = "http://localhost:2586" }
+NTFY_BASE_URL       = { setting = "ntfy:base-url", default = "http://localhost:2586", recorded_with = "http://192.0.2.1:2586" }
 NTFY_CACHE_DURATION = { setting = "ntfy:cache-duration", default = "72h" }
 
 [[secret]]
