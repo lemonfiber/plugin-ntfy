@@ -1,0 +1,18 @@
+{
+  "lemonfiber": "ffa9d036adc5b5fc661d772616fd9949fa6188cd",
+  "against": "recordings",
+  "proofs": [
+    {
+      "id": "ntfy.healthy",
+      "kind": "proof",
+      "outcome": "passed",
+      "detail": ""
+    },
+    {
+      "id": "ntfy.closed-to-nobody",
+      "kind": "proof",
+      "outcome": "passed",
+      "detail": ""
+    }
+  ]
+}
