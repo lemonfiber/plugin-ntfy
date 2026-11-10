@@ -28,7 +28,8 @@ before ntfy first starts.
 | Setting | Value | Why |
 | --- | --- | --- |
 | `auth-default-access` | `deny-all` | Nobody reads or publishes to a topic without an account |
-| `auth-users` | `lemonfiber`, an admin | The account lemonfiber publishes and reads history as. Its password is minted at install as the secret `ntfy:password` and written here as the bcrypt hash ntfy keeps |
+| `auth-users` | `lemonfiber`, a user | The account lemonfiber publishes and reads history as. Its password is minted at install as the secret `ntfy:password` and written here as the bcrypt hash ntfy keeps. It is no admin, so it cannot manage accounts or access |
+| `auth-access` | `lemonfiber:lemonfiber-*:rw` | That account may publish to and read only the topics whose names start with `lemonfiber-`; every other topic refuses it |
 | `enable-signup` | `false` | Nobody makes an account through the web app |
 | `enable-login`, `require-login` | `true` | The web app asks for an account before it shows anything |
 | `cache-file` | `/config/cache.db` | Messages are kept on disk and survive a restart, so a topic's history can be read back to prove a delivery |
@@ -64,7 +65,11 @@ The plugin verdict comes from spec's
 workflow. Its `plugin` job reads the manifest as the lemonfiber in `targets.toml`
 reads it, checks every proof against its recording, and checks every pinned
 digest. Its `live` job runs the pinned image under the manifest's posture and
-takes every recording again. This repository holds no Python of its own.
+takes every recording again. The `account` job starts the pinned image with the
+starting configuration and a fresh password, publishes to a `lemonfiber-` topic
+as `lemonfiber`, reads the message back from the topic's history, and holds
+every other topic and every caller presenting nothing to a refusal. This
+repository holds no Python of its own.
 `just ci` runs the gates that need nothing but this tree.
 
 ## Licence
