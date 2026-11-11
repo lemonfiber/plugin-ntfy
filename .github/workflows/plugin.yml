@@ -10,3 +10,65 @@ concurrency:
 jobs:
   plugin:
     uses: lemonfiber/spec/.github/workflows/first-party-plugin.yml@628a1f51b42b212054e0cf70f6f77fd75f424a40 # v1.0.144
+
+  # The account lemonfiber holds on ntfy, proved on the pinned image with the starting
+  # configuration: a fresh password, written as the bcrypt hash ntfy reads, publishes to
+  # a lemonfiber- topic and reads the message back from its history, and is refused every
+  # other topic, as is a caller presenting nothing (ARCH-R402, B9-R3).
+  account:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: ntfy, started under its posture with the starting configuration
+        run: |
+          set -euo pipefail
+          image="$(python3 -c 'import tomllib; s = next(s for s in tomllib.load(open("plugin.toml", "rb"))["service"] if s["id"] == "ntfy"); print(s["image"] + "@" + s["digest"])')"
+          password="$(openssl rand -hex 16)"
+          echo "::add-mask::${password}"
+          hash="$(printf '%s\n%s\n' "${password}" "${password}" | docker run --rm -i "${image}" user hash 2>/dev/null | tail -n 1)"
+          echo "::add-mask::${hash}"
+          mkdir -m 0777 "${RUNNER_TEMP}/ntfy"
+          HASH="${hash}" python3 -c 'import os, sys; t = open("config/ntfy/server.yml").read(); open(sys.argv[1], "w").write(t.replace("{{secret:password|bcrypt}}", os.environ["HASH"]))' "${RUNNER_TEMP}/ntfy/server.yml"
+          chmod 0644 "${RUNNER_TEMP}/ntfy/server.yml"
+          docker run -d --name ntfy-account --read-only --cap-drop ALL --security-opt no-new-privileges \
+            --user 1000:1000 -v "${RUNNER_TEMP}/ntfy:/config" \
+            -e NTFY_CONFIG_FILE=/config/server.yml -e NTFY_BASE_URL=https://192.0.2.1 \
+            -p 127.0.0.1:2586:2586 "${image}" serve >/dev/null
+          for _ in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:2586/v1/health >/dev/null 2>&1; then break; fi
+            sleep 1
+          done
+          curl -fsS http://127.0.0.1:2586/v1/health
+          echo "NTFY_PASSWORD=${password}" >> "$GITHUB_ENV"
+      - name: lemonfiber publishes to its topic and reads the message back from history
+        run: |
+          set -euo pipefail
+          published="$(curl -fsS -u "lemonfiber:${NTFY_PASSWORD}" -H 'Title: account' -d 'proof' http://127.0.0.1:2586/lemonfiber-ci)"
+          history="$(curl -fsS -u "lemonfiber:${NTFY_PASSWORD}" 'http://127.0.0.1:2586/lemonfiber-ci/json?poll=1&since=all')"
+          PUBLISHED="${published}" HISTORY="${history}" python3 -c 'import json, os, sys; sent = json.loads(os.environ["PUBLISHED"])["id"]; kept = [json.loads(line)["id"] for line in os.environ["HISTORY"].splitlines() if line.strip()]; sys.exit(0 if sent in kept else "the message published as " + sent + " is not in the topic history")'
+      - name: Every other topic, and every caller presenting nothing, is refused
+        run: |
+          set -euo pipefail
+          refused() {
+            local said
+            said="$(curl -s -o /dev/null -w '%{http_code}' "$@")"
+            if [ "${said}" != "403" ]; then
+              echo "::error::expected 403, got ${said}: ${*: -1}"
+              exit 1
+            fi
+          }
+          refused -u "lemonfiber:${NTFY_PASSWORD}" -d 'proof' http://127.0.0.1:2586/elsewhere
+          refused -u "lemonfiber:${NTFY_PASSWORD}" 'http://127.0.0.1:2586/elsewhere/json?poll=1'
+          refused -d 'proof' http://127.0.0.1:2586/lemonfiber-ci
+          refused 'http://127.0.0.1:2586/lemonfiber-ci/json?poll=1'
+          said="$(curl -s -o /dev/null -w '%{http_code}' -u "lemonfiber:${NTFY_PASSWORD}" http://127.0.0.1:2586/v1/users)"
+          if [ "${said}" = "200" ]; then
+            echo "::error::the lemonfiber account reads ntfy's users, which only an admin may"
+            exit 1
+          fi
+      - name: ntfy's log, on failure
+        if: failure()
+        run: docker logs ntfy-account 2>&1 | tail -n 50 || true

@@ -22,10 +22,12 @@ says how the catalogue pins it as an `[[offered]]` and how lemonfiber carries it
   server and nothing else: no adapter, no image, no code.
 - **One service, on the upstream image pinned by digest**, started with
   `args = ["serve"]` because the image runs nothing until told to (`ARCH-R407`).
-- **Deny-all, one account.** `config/ntfy/server.yml` declares the `lemonfiber`
-  admin with `{{secret:password|bcrypt}}`, the bcrypt hash of the minted secret
-  `ntfy:password` (`ARCH-R406`). The core reads that secret to publish and to read a
-  topic's history (`ARCH-R402`).
+- **Deny-all, one account, one prefix.** `config/ntfy/server.yml` declares the
+  `lemonfiber` user with `{{secret:password|bcrypt}}`, the bcrypt hash of the minted
+  secret `ntfy:password` (`ARCH-R406`), and grants it read and write on
+  `lemonfiber-*` alone. The core reads that secret to publish and to read a topic's
+  history (`ARCH-R402`). The account is never an admin, and the `account` job in
+  `plugin.yml` holds it to exactly that.
 - **Every file it writes is under `/config`.** It runs `confined`, as the
   operator's user, with a read-only root.
 - **It fills no capability and replaces no part.** Its forms are every form

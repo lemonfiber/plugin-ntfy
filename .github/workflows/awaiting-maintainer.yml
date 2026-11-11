@@ -2,7 +2,7 @@
 #
 #   gates     gates / gates
 #   pin-only  pin-only / pin-only
-#   plugin    plugin / what changed, plugin / plugin, plugin / live
+#   plugin    plugin / what changed, plugin / plugin, plugin / live, account
 #   codeql    analyze, alerts / alerts
 #   sonar     gate / gate
 name: awaiting-maintainer
