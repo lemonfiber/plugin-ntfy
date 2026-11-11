@@ -9,7 +9,7 @@ description = "The household's own push server: alerts reach your phones through
 without_it  = "Alerts reach a phone only through a push service you set up and run yourself"
 upstream    = "https://github.com/binwiederhier/ntfy"
 license     = "Apache-2.0"
-forms       = ["search", "dl", "hunt", "tv", "movies", "music", "books", "auto", "library", "full"]
+forms       = ["search", "dl", "hunt", "tv", "movies", "music", "books", "auto", "library", "full", "proxy"]
 
 [[service]]
 id          = "ntfy"

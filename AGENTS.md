@@ -32,8 +32,9 @@ says how the catalogue pins it as an `[[offered]]` and how lemonfiber carries it
   lemonfiber, and the household reaches it only through the proxy's TLS, as `ntfy`.
 - **Every file it writes is under `/config`.** It runs `confined`, as the
   operator's user, with a read-only root.
-- **It fills no capability and replaces no part.** Its forms are every form
-  whose closure holds the bundle's `notify` profile, and no service declares
-  `replaces`.
+- **It fills no capability and replaces no part.** It sits in the bundle's
+  `notify` profile, which runs beside whichever forms run, so `[plugin].forms` names
+  every form the bundle declares, `proxy` included (`ARCH-R410`). No service
+  declares `replaces`.
 - **Every service declares `reaches` and `asks_for`** (`ARCH-R270`).
 - **No Python here.** The reader is spec's `first-party-plugin` workflow's.
