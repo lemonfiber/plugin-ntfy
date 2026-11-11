@@ -11,7 +11,8 @@ The default bundle in
 repository as an offered plugin, by a revision and the digests of its manifest
 and its tree, and lemonfiber compiles that tree in. The stack does not run it
 until the operator installs it. lemonfiber then installs it offline from that
-tree, in whichever form the stack runs.
+tree. Its profile, `notify`, runs beside whichever forms the stack runs, so it
+names every form; it starts once those forms leave something of their own to run.
 
 Its image is ntfy's own, `binwiederhier/ntfy`, pinned by digest and started
 with `serve`. This repository builds no image, so the bundle pins its revision.

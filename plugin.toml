@@ -1,4 +1,4 @@
-#:schema https://raw.githubusercontent.com/lemonfiber/lemonfiber/726fdabead6ab457ae0f68ed50a43b9d91a264b9/contract/plugin-manifest.schema.json
+#:schema https://raw.githubusercontent.com/lemonfiber/lemonfiber/b3a9bbe3589e079176f9cafcbc3af5eb784a406b/contract/plugin-manifest.schema.json
 schema_version = 1
 
 [plugin]
@@ -9,7 +9,7 @@ description = "The household's own push server: alerts reach your phones through
 without_it  = "Alerts reach a phone only through a push service you set up and run yourself"
 upstream    = "https://github.com/binwiederhier/ntfy"
 license     = "Apache-2.0"
-forms       = ["search", "dl", "hunt", "tv", "movies", "music", "books", "auto", "library", "full"]
+forms       = ["search", "dl", "hunt", "tv", "movies", "music", "books", "auto", "library", "full", "proxy"]
 
 [[service]]
 id          = "ntfy"
