@@ -35,13 +35,13 @@ before ntfy first starts.
 | `cache-file` | `/config/cache.db` | Messages are kept on disk and survive a restart, so a topic's history can be read back to prove a delivery |
 | `auth-file` | `/config/auth.db` | Accounts and access rules |
 | `attachment-cache-dir` | `/config/attachments` | Files sent with a message |
-| `listen-http` | `:2586` | The port it answers on, published on the household network |
+| `listen-http` | `:2586` | The port it answers on. It is published on this machine's loopback interface alone, where lemonfiber reaches it; phones and browsers reach it as `https://ntfy.<domain>` through the proxy, so no password crosses the network in clear |
 
 Two settings come from lemonfiber's settings, and the operator can change them:
 
 | Setting | Variable | Default | What it is |
 | --- | --- | --- | --- |
-| `ntfy:base-url` | `NTFY_BASE_URL` | `http://localhost:2586` | The address phones reach ntfy at, used in the links it writes for attachments. Set it to the address the household uses, such as `https://ntfy.<domain>` behind the proxy |
+| `ntfy:base-url` | `NTFY_BASE_URL` | `http://localhost:2586` | The address phones reach ntfy at, used in the links it writes for attachments. Set it to `https://ntfy.<domain>`, the proxy's address for it |
 | `ntfy:cache-duration` | `NTFY_CACHE_DURATION` | `72h` | How long a message stays in a topic's history. A delivery can be proved, and a phone that was offline can catch up, only within this window |
 
 The service runs `confined`, as the operator's user, with a read-only root. Every
