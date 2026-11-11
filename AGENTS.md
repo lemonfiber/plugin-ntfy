@@ -28,6 +28,8 @@ says how the catalogue pins it as an `[[offered]]` and how lemonfiber carries it
   `lemonfiber-*` alone. The core reads that secret to publish and to read a topic's
   history (`ARCH-R402`). The account is never an admin, and the `account` job in
   `plugin.yml` holds it to exactly that.
+- **`bind = "proxied"`** (`ARCH-R408`). Its port is published on loopback alone for
+  lemonfiber, and the household reaches it only through the proxy's TLS, as `ntfy`.
 - **Every file it writes is under `/config`.** It runs `confined`, as the
   operator's user, with a read-only root.
 - **It fills no capability and replaces no part.** Its forms are every form
